@@ -9,16 +9,26 @@ uint8_t vm_decode_consume(machine_t *m)
     return m->memory[ip];
 }
 
-/// Check reg and access
-#define REG(r) do { assert(r < NUM_REGIS } while (0);
+uint64_t vm_decode_consume_value(machine_t *m, uint8_t size)
+{
+    uint64_t value = 0;
 
-// MSN/LSN: Most/Less Significant Nibble 
+    for (uint8_t i = size; i > 0; i--) {
+        value |= (vm_decode_consume(m) << ((i - 1) * 8));
+        printf("%d (%d): %x\n", i, size, value);
+    }
+
+    return value;
+}
+
+/// MSN/LSN: Most/Less Significant Nibble 
 #define MSN(v) (v >> 4)
 #define LSN(v) (v & 0xF)
 
 /// We use computed gotos for efficient opcode execution
 /// Check references :>
 #define DISPATCH() goto *dispatch_table[vm_decode_consume(m)]
+
 void vm_decode_instr(machine_t *m)
 {
     uint8_t instr[4];
@@ -39,26 +49,7 @@ void vm_decode_instr(machine_t *m)
             DISPATCH();
         MOV_RI:
             instr[1] = vm_decode_consume(m);
-            uint8_t dst = MSN(instr[1]);
-            uint8_t sz  = LSN(instr[1]);
-            uint64_t value;
-
-            switch (sz) {
-            case 0:
-                value = vm_decode_consume(m);
-                break;
-            case 1:
-                value = (vm_decode_consume(m) << 8) | vm_decode_consume(m);
-                break;
-            case 2:
-                value = (vm_decode_consume(m) << 24) | (vm_decode_consume(m) << 16) | (vm_decode_consume(m) << 8) | vm_decode_consume(m);
-                break;
-            default:
-                assert(0 && "Invalid immediate size");
-                break;
-            }
-
-            m->registers[dst] = value;
+            m->registers[MSN(instr[1])] = vm_decode_consume_value(m, LSN(instr[1]));
             DISPATCH();
         MOV_RM:
             instr[1] = vm_decode_consume(m);
