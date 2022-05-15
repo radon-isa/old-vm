@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "machine.h"
+#include "decode.h"
 
 machine_t *vm_machine_create(uint32_t memsize)
 {
@@ -27,4 +28,18 @@ uint8_t vm_machine_read(machine_t *m, uint32_t address) /* Page table walk will 
 {
     assert(address < m->memsize && "address out of bounds");
     return m->memory[address];
+}
+
+uint8_t vm_machine_write(machine_t *m, uint32_t address, uint8_t value) /* Page table walk will be here */
+{
+    assert(address < m->memsize && "address out of bounds");
+    return (m->memory[address] = value);
+}
+
+void vm_machine_exec(machine_t *m, uint32_t start_address)
+{
+    assert(start_address < m->memsize && "address out of bounds");
+    
+    m->registers[INSTR_PTR] = start_address;
+    vm_decode_instr(m);
 }

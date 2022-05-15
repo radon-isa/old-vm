@@ -42,4 +42,6 @@ enum {
     POP,
 };
 
+void vm_decode_instr(machine_t *m);
+
 #endif
