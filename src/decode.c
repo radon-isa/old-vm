@@ -13,20 +13,21 @@ uint64_t vm_decode_consume_value(machine_t *m, uint8_t size)
 {
     uint64_t value = 0;
 
+    // Radon is big-endian, so we need to shift values starting
+    // from the most significant byte
     for (uint8_t i = size; i > 0; i--) {
         value |= (vm_decode_consume(m) << ((i - 1) * 8));
-        printf("%d (%d): %x\n", i, size, value);
     }
 
     return value;
 }
 
-/// MSN/LSN: Most/Less Significant Nibble 
+// MSN/LSN: Most/Less Significant Nibble 
 #define MSN(v) (v >> 4)
 #define LSN(v) (v & 0xF)
 
-/// We use computed gotos for efficient opcode execution
-/// Check references :>
+// We use computed gotos for efficient opcode execution
+// Check references :>
 #define DISPATCH() goto *dispatch_table[vm_decode_consume(m)]
 
 void vm_decode_instr(machine_t *m)
