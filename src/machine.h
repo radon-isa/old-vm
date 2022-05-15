@@ -33,6 +33,7 @@ machine_t *vm_machine_create(uint32_t memsize);
 void vm_machine_destroy(machine_t *m);
 uint8_t vm_machine_read(machine_t *m, uint32_t address);
 uint8_t vm_machine_write(machine_t *m, uint32_t address, uint8_t value);
+uint64_t vm_machine_read_value(machine_t *m, uint32_t address, uint8_t size);
 void vm_machine_exec(machine_t *m, uint32_t start_address);
 
 #endif

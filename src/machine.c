@@ -36,6 +36,19 @@ uint8_t vm_machine_write(machine_t *m, uint32_t address, uint8_t value) /* Page 
     return (m->memory[address] = value);
 }
 
+uint64_t vm_machine_read_value(machine_t *m, uint32_t address, uint8_t size)
+{
+    assert(address < m->memsize && "address out of bounds");
+    uint64_t value;
+    uint8_t offset;
+
+    for (uint8_t i = size, offset = 0; i > 0; i--, offset++) {
+        value |= (vm_machine_read(m, address + offset) << ((i - 1) * 8));
+    }
+
+    return value;
+}
+
 void vm_machine_exec(machine_t *m, uint32_t start_address)
 {
     assert(start_address < m->memsize && "address out of bounds");
