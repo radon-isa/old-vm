@@ -4,6 +4,8 @@
 #include "machine.h"
 #include "decode.h"
 
+#define CHECK_ADDRESS(a) do { assert(a < m->memsize && "address out of bounds"); } while (0);
+
 machine_t *vm_machine_create(uint32_t memsize)
 {
     machine_t *m = calloc(1, sizeof(machine_t));
@@ -26,21 +28,21 @@ void vm_machine_destroy(machine_t *m)
 
 uint8_t vm_machine_read(machine_t *m, uint32_t address) /* Page table walk will be here */
 {
-    assert(address < m->memsize && "address out of bounds");
+    CHECK_ADDRESS(address);
     return m->memory[address];
 }
 
 uint8_t vm_machine_write(machine_t *m, uint32_t address, uint8_t value) /* Page table walk will be here */
 {
-    assert(address < m->memsize && "address out of bounds");
+    CHECK_ADDRESS(address);
     return (m->memory[address] = value);
 }
 
 uint64_t vm_machine_read_value(machine_t *m, uint32_t address, uint8_t size)
 {
-    assert(address < m->memsize && "address out of bounds");
-    uint64_t value;
-    uint8_t offset;
+    CHECK_ADDRESS(address);
+
+    uint64_t value = 0;
 
     for (uint8_t i = size, offset = 0; i > 0; i--, offset++) {
         value |= (vm_machine_read(m, address + offset) << ((i - 1) * 8));
@@ -51,7 +53,7 @@ uint64_t vm_machine_read_value(machine_t *m, uint32_t address, uint8_t size)
 
 void vm_machine_exec(machine_t *m, uint32_t start_address)
 {
-    assert(start_address < m->memsize && "address out of bounds");
+    CHECK_ADDRESS(start_address);
     
     m->registers[INSTR_PTR] = start_address;
     vm_decode_instr(m);
