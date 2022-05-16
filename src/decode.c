@@ -26,6 +26,10 @@ uint64_t vm_decode_consume_value(machine_t *m, uint8_t size)
 #define MSN(v) (v >> 4)
 #define LSN(v) (v & 0xF)
 
+// MSC/LSC: Most/Less Significant Crumb (2 bit values)
+#define MSC(v) (v >> 2)
+#define LSC(v) (v & 0x3)
+
 // We use computed gotos for efficient opcode execution
 // Check references :>
 #define DISPATCH() goto *dispatch_table[vm_decode_consume(m)]
@@ -45,22 +49,26 @@ void vm_decode_instr(machine_t *m)
     DISPATCH();
     while (1) {
         MOV_RR:
+            printf("MOV_RR %x\n", m->registers[INSTR_PTR]);
             instr[1] = vm_decode_consume(m);
             m->registers[MSN(instr[1])] = m->registers[LSN(instr[1])];
             DISPATCH();
         MOV_RI:
+            printf("MOV_RI\n");
             instr[1] = vm_decode_consume(m);
             m->registers[MSN(instr[1])] = vm_decode_consume_value(m, LSN(instr[1]));
             DISPATCH();
         MOV_RM:
+            printf("MOV_RM\n");
             instr[1] = vm_decode_consume(m);
-            printf("Opcode 2: %x\n", instr[1]);
+            m->registers[MSN(instr[1])] = vm_machine_read_value(m, vm_decode_consume_value(m, 4) + (LSC(LSN(instr[1])) ? vm_decode_consume_value(m, 2) : 0), MSC(LSN(instr[1]))); 
             DISPATCH();
         MOV_MR:
             instr[1] = vm_decode_consume(m);
             printf("Opcode 3: %x\n", instr[1]);
             DISPATCH();
         HLT:
+            printf("HLT\n");
             break;
     }
 }
