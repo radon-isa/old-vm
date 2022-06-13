@@ -1,10 +1,18 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -g -std=c11
+CFLAGS=-Wall -Wextra -g -std=c11 -pedantic
 LIBS=
-BINARY=build/rvm
+BINARY=rvm
+SRC:=$(wildcard src/*.c)
+OBJ:=$(SRC:.c=.o)
 
-all:
-	$(CC) -c src/machine.c -o build/machine.o $(CFLAGS) $(LIBS)
-	$(CC) -c src/decode.c -o build/decode.o $(CFLAGS) $(LIBS)
-	$(CC) -c src/main.c -o build/main.o $(CFLAGS) $(LIBS)
-	$(CC) -o $(BINARY) build/main.o build/machine.o build/decode.o $(CFLAGS) $(LIBS) 
+all: $(BINARY)
+
+$(BINARY): $(OBJ)
+	$(CC) $(OBJ) -o $(BINARY)
+
+%.o: %.c
+	$(CC) -c $< -o $@
+
+.PHONY: clean
+clean:
+	@rm -v $(BINARY) $(OBJ)
